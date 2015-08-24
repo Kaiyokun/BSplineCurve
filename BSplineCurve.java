@@ -1,9 +1,4 @@
 import java.util.ArrayList;
-import java.io.File;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.FileNotFoundException;
 
 public class BSplineCurve {
 
@@ -252,54 +247,8 @@ public class BSplineCurve {
 
     public static void main( String[] args ) {
 
-        try {
+        BSplineCurve thisInstance = new BSplineCurve( DataPointIO.load( args[0] ) );
 
-            BufferedReader       brIn       = new BufferedReader( new FileReader( new File( args[1] ) ) );
-            ArrayList<DataPoint> modelPoint = new ArrayList<DataPoint>();
-            String               line       = null;
-
-            while ( (line = brIn.readLine() ) != null ) {
-
-                modelPoint.add( new DataPoint( line ) );
-            }
-
-            BSplineCurve         instance = new BSplineCurve( modelPoint );
-            ArrayList<DataPoint> curve    = instance.Interpolate( Integer.parseInt( args[0] ) );
-/*
-            int                  split    = Integer.parseInt( args[0] );
-            double               stepSize = 1.0 / split;
-            double               u        = 0.0;
-
-            for (int i=0; i<split; ++i) {
-
-                NonstandardDoubleArray deBoorPoint = instance.calcDeBoorPoint( u );
-
-                System.out.print( u );
-
-                for (int j=deBoorPoint.begin(); j<=deBoorPoint.end(); ++j) {
-
-                    System.out.print( "\t" + deBoorPoint.at(j) );
-                }
-
-                System.out.println( "" );
-
-                u += stepSize;
-            }
-*/
-            for (DataPoint p : curve) {
-
-                System.out.println( p.t() + "\t" + p.x() );
-            }
-
-            brIn.close();
-
-        } catch (FileNotFoundException ex) {
-
-             System.out.println("找不到指定文件！");
-
-        } catch (IOException e) {
-
-             System.out.println("文件读取有误！");
-        }
+        DataPointIO.save( thisInstance.Interpolate( Integer.parseInt( args[1] ) ), args[2] );
     }
 }
