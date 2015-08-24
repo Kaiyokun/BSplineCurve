@@ -25,12 +25,12 @@ public class CoxDeBoorAlgo {
         // a[i]
         IndexSet<Double> uDistance = this.calcDistance( k, u );
 
-        //                             N[k-p][p]
-        //               N[k-p+1][p-1] N[k-p+1][p]
-        //             ...................
-        // N[k][0] N[k][1] ...         N[k][p]
+        //                                 N[k-p][p]
+        //                   N[k-p+1][p-1] N[k-p+1][p]
+        //                  ......................
+        // N[k][0]       N[k][1]       ... N[k][p]
         IndexSet<Double> deBoorPoint
-            = new IndexSet<Double>( new Double[ p + 1 ], k - p, k );
+            = new IndexSet<>( new Double[ p + 1 ], k - p, k );
 
         // N[k][0] = 1
         deBoorPoint.set( k, 1.0 );
