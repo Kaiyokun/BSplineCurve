@@ -9,7 +9,7 @@ public class BSplineCurve {
 
     private DataPoint[] ctrlPoint; // 控制点, n+1个, P[0], P[1], ..., P[n]
     private int         pth;       // 样条次数, p次
-    private double[]    node;      // 节点, m+1个, m = n + 1 + p
+    private InterpNode    node;      // 节点, m+1个, m = n + 1 + p
     private double[][]  dNode;     // 节点间长度 b[i][p] = u[i+p] - u[i]
 
     private void calcCtrlPoint( ArrayList<DataPoint> modelPoint ) {
@@ -45,7 +45,7 @@ public class BSplineCurve {
 
         for (int i=2; i<n-1; ++i) {
 
-            NonstandardDoubleArray deBoorPoint = calcDeBoorPoint( this.node[2+i] );
+            NonstandardDoubleArray deBoorPoint = calcDeBoorPoint( this.node.at(2+i) );
 
             a[i] = deBoorPoint.at(i-1);
             b[i] = deBoorPoint.at(i);
@@ -104,34 +104,16 @@ public class BSplineCurve {
         }
     }
 
-    private void calcNode( int nodeCount ) {
+    private void calcNode( DataPoint[] modelPoint ) {
 
         // m + 1 = n + 1 + p + 1
-        this.node = new double[ nodeCount ];
-
-        for (int i=0; i<=this.pth; ++i) {
-
-            // u[0] = u[1] = ... = u[p] = 0
-            this.node[i] = 0.0;
-
-            // u[m-p] = u[m-p+1] = ... = u[m] = 1
-            this.node[i+(this.node.length-1)-this.pth] = 1.0;
-        }
-
-        // h = 1 / ( (m - p - 1) - p + 1 + 1) = 1 / (m + 1 - 2*p)
-        double stepSize = 1.0 / (this.node.length - 2*this.pth);
-
-        // u[p+1], u[p+2], ..., u[m-p-1]
-        for (int i=this.pth+1; i<(this.node.length-1)-this.pth; ++i) {
-
-            this.node[i] = this.node[i-1] + stepSize;
-        }
+        this.node = new InterpNode( modelPoint );
     }
 
     private void calcIntervalLengthNode() {
 
         // [m-p-1][p]
-        this.dNode = new double[ (this.node.length - 1) - this.pth - 1 ][];
+        this.dNode = new double[ (this.node.length() - 1) - this.pth - 1 ][];
 
         for (int i=0; i<this.dNode.length; ++i) {
 
@@ -150,38 +132,9 @@ public class BSplineCurve {
 
             for (p=(p<0)?0:p; p<this.pth; ++p) {
 
-                this.dNode[i][p] = node[(i+1)+(p+1)] - node[i+1];
+                this.dNode[i][p] = node.distance( (i+1)+(p+1), i+1 );
             }
         }
-    }
-
-    private int calcIntervalLeftBoundary( double u ) {
-
-        // u[0] = u[1] = ... = u[p] = 0
-        int leftBoundary  = this.pth;
-
-        // u[m-p] = u[m-p+1] = ... = u[m] = 1
-        int rightBoundary = (this.node.length - 1) - this.pth;
-
-        while (leftBoundary != rightBoundary) {
-
-            int checkPoint = (leftBoundary + rightBoundary) / 2;
-
-            if (u < this.node[checkPoint]) {
-
-                rightBoundary = checkPoint;
-
-            } else if (u >= this.node[checkPoint+1]) {
-
-                leftBoundary = checkPoint + 1;
-
-            } else {
-
-                return checkPoint;
-            }
-        }
-
-        return -1;
     }
 
     private NonstandardDoubleArray calcIntervalLengthU( int k, double u ) {
@@ -192,7 +145,7 @@ public class BSplineCurve {
 
         for (int i=du.begin(); i<=du.end(); ++i) {
 
-            du.set( i, u - this.node[i] );
+            du.set( i, this.node.distance( u, i ) );
         }
 
         return du;
@@ -201,7 +154,7 @@ public class BSplineCurve {
     private NonstandardDoubleArray calcDeBoorPoint( double u ) {
 
         // u in [u[k], u[k+1])
-        int k = this.calcIntervalLeftBoundary( u );
+        int k = this.node.leftBound( u );
 
         // a[i]
         NonstandardDoubleArray du
@@ -270,9 +223,12 @@ public class BSplineCurve {
 
     public void reset( ArrayList<DataPoint> modelPoint, int pth ) {
 
+        DataPoint[] V = new DataPoint[modelPoint.size()];
+        modelPoint.toArray( V );
+
         this.pth = pth;
 
-        this.calcNode( modelPoint.size() + 2 * this.pth );
+        this.calcNode( V );
 
         this.calcIntervalLengthNode();
 
@@ -304,9 +260,7 @@ public class BSplineCurve {
 
             while ( (line = brIn.readLine() ) != null ) {
 
-                String[] data = line.split("\t");
-                modelPoint.add( new DataPoint(  Double.parseDouble( data[1] )
-                                              , Double.parseDouble( data[0] ) ) );
+                modelPoint.add( new DataPoint( line ) );
             }
 
             BSplineCurve         instance = new BSplineCurve( modelPoint );

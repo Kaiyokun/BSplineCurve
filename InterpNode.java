@@ -66,8 +66,7 @@ public class InterpNode {
     private void calcInterpNode( DataPoint[] modelPoint ) {
 
         int p = this.pth;
-        int n = modelPoint.length - 1;
-        int m = n + 2*p;
+        int m = (modelPoint.length - 1) + 2*p;
 
         this.interpNode = new double[ m + 1 ];
 
@@ -77,20 +76,72 @@ public class InterpNode {
             this.interpNode[i] = 0.0;
 
             // u[m-p] = u[m-p+1] = ... = u[m] = 1
-            this.interpNode[m+p+i] = 1.0;
+            this.interpNode[m-p+i] = 1.0;
         }
 
-        double[] chordLength = new double[ n + 1 ];
-        chordLength[0] = 0.0;
+        this.defaultMethod( modelPoint );
+    }
+
+    /**
+     * 累积弦长法
+     */
+    private void cumulateChordLength( DataPoint[] modelPoint ) {
+
+        int n = modelPoint.length - 1;
+        int p = this.pth;
+
+        double[] chordLength    = new double[ n + 1 ];
+                 chordLength[0] = 0.0;
 
         for (int i=0; i<n; ++i) {
 
-            chordLength[i+1] = chordLength[i] + modelPoint[i+1].distance( modelPoint[i] );
+            chordLength[i+1] = chordLength[i]
+                             + modelPoint[i+1].distance( modelPoint[i] );
         }
 
         for (int i=1; i<n; ++i) {
 
             this.interpNode[p+i] = chordLength[i] / chordLength[n];
+        }
+    }
+
+    /**
+     * 向心参数法
+     */
+    private void cumulateSqrtChordLength( DataPoint[] modelPoint ) {
+
+        int n = modelPoint.length - 1;
+        int p = this.pth;
+
+        double[] chordLength    = new double[ n + 1 ];
+                 chordLength[0] = 0.0;
+
+        for (int i=0; i<n; ++i) {
+
+            chordLength[i+1] = chordLength[i]
+                             + Math.sqrt( modelPoint[i+1].distance( modelPoint[i] ) );
+        }
+
+        for (int i=1; i<n; ++i) {
+
+            this.interpNode[p+i] = chordLength[i] / chordLength[n];
+        }
+    }
+
+    /**
+     * 均匀参数法
+     */
+    private void defaultMethod( DataPoint[] modelPoint ) {
+
+        int p = this.pth;
+        int m = (modelPoint.length - 1) + 2*p;
+
+        double h = 1.0 / modelPoint.length;
+
+        for (int i=p+1; i<m-p; ++i) {
+
+            // u[p+1], u[p+2], ..., u[m-p-1]
+            this.interpNode[i] = this.interpNode[i-1] + h;
         }
     }
 
