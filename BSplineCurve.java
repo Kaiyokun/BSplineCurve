@@ -6,6 +6,7 @@ public class BSplineCurve {
     private int         pth;       // 样条次数, p次
     private InterpNode    node;      // 节点, m+1个, m = n + 1 + p
     private double[][]  dNode;     // 节点间长度 b[i][p] = u[i+p] - u[i]
+    private CoxDeBoorAlgo deBoorAlgo;
 
     private void calcCtrlPoint( ArrayList<DataPoint> modelPoint ) {
 
@@ -195,7 +196,7 @@ public class BSplineCurve {
 
     private DataPoint calcCurve( double u ) {
 
-        NonstandardDoubleArray deBoorPoint = this.calcDeBoorPoint( u );
+        IndexSet<Double> deBoorPoint = this.deBoorAlgo.calc( u );
         DataPoint              point       = new DataPoint();
 
         for (int i=deBoorPoint.begin(); i<=deBoorPoint.end(); ++i) {
@@ -226,6 +227,8 @@ public class BSplineCurve {
         this.calcNode( V );
 
         this.calcIntervalLengthNode();
+
+        this.deBoorAlgo = new CoxDeBoorAlgo( node );
 
         this.calcCtrlPoint( modelPoint );
     }
