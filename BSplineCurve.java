@@ -132,11 +132,11 @@ public class BSplineCurve {
         }
     }
 
-    private NonstandardDoubleArray calcIntervalLengthU( int k, double u ) {
+    private IndexSet<Double> calcIntervalLengthU( int k, double u ) {
 
-        NonstandardDoubleArray du
+        IndexSet<Double> du
             // a[k-p+1], ..., a[k], a[k+1], ..., a[k+p]
-            = new NonstandardDoubleArray( k - this.pth + 1, k + this.pth );
+            = new IndexSet<>( new Double[2*this.pth], k - this.pth + 1, k + this.pth );
 
         for (int i=du.begin(); i<=du.end(); ++i) {
 
@@ -152,7 +152,7 @@ public class BSplineCurve {
         int k = this.node.leftBound( u );
 
         // a[i]
-        NonstandardDoubleArray du
+        IndexSet<Double> du
             = this.calcIntervalLengthU( k, u );
 
         //                     N[k-p][p]
