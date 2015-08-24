@@ -1,98 +1,80 @@
+/**
+ * 用于描述二维点P(t,x)的类
+ */
 public class DataPoint {
 
-    private double x;
-    private double t;
+    public DataPoint( double t, double x ) {
+
+        this.t = t;
+        this.x = x;
+    }
 
     public DataPoint() {
 
         this( 0.0, 0.0 );
     }
 
-    public DataPoint( double x, double t ) {
-
-        this.x = x;
-        this.t = t;
-    }
-
     public DataPoint( DataPoint point ) {
 
-        this( point.x, point.t );
+        this( point.t, point.x );
     }
 
-    public static DataPoint add( DataPoint left, DataPoint right ) {
+    public DataPoint( String text ) {
+
+        String[] point = text.split("\t");
+
+        this.t = Double.parseDouble( point[0] );
+        this.x = Double.parseDouble( point[1] );
+    }
+
+    public DataPoint neg() {
 
         DataPoint result = new DataPoint();
 
-        result.x = left.x + right.x;
-        result.t = left.t + right.t;
-
-        return result;
-    }
-
-    public static DataPoint sub( DataPoint left, DataPoint right ) {
-
-        DataPoint result = new DataPoint();
-
-        result.x = left.x - right.x;
-        result.t = left.t - right.t;
-
-        return result;
-    }
-
-    public static DataPoint mul( double factor, DataPoint point ) {
-
-        DataPoint result = new DataPoint();
-
-        result.x = factor * point.x;
-        result.t = factor * point.t;
+        result.t = -this.t;
+        result.x = -this.x;
 
         return result;
     }
 
     public DataPoint add( DataPoint point ) {
 
-        this.x += point.x;
         this.t += point.t;
+        this.x += point.x;
 
         return this;
     }
 
     public DataPoint sub( DataPoint point ) {
 
-        this.x -= point.x;
-        this.t -= point.t;
-
-        return this;
+        return this.add( point.neg() );
     }
 
     public DataPoint mul( double factor ) {
 
-        this.x *= factor;
         this.t *= factor;
+        this.x *= factor;
 
         return this;
     }
 
-    public static Vector1D crossProduct( DataPoint left, DataPoint right ) {
+    public static DataPoint add( DataPoint left, DataPoint right ) {
 
-        Vector1D.Sign sign   = Vector1D.Sign.ZERO;
-        double        module = left.t*right.x - left.x*right.t;
+        DataPoint result = new DataPoint( left );
 
-        if (module == 0) {
-
-            sign = Vector1D.Sign.ZERO;
-
-        } else {
-
-            sign = (module > 0) ? Vector1D.Sign.POSITIVE : Vector1D.Sign.NEGATIVE;
-        }
-
-        return new Vector1D( sign, module );
+        return result.add( right );
     }
 
-    public double x() {
+    public static DataPoint sub( DataPoint left, DataPoint right ) {
 
-        return this.x;
+        return right.neg().add( left );
+    }
+
+    public static DataPoint mul( double factor, DataPoint point ) {
+
+        DataPoint result = new DataPoint( point );
+
+        return result.mul( factor );
     }
 
     public double t() {
@@ -100,8 +82,65 @@ public class DataPoint {
         return this.t;
     }
 
+    public double x() {
+
+        return this.x;
+    }
+
     public double module() {
 
-        return Math.sqrt( this.x*this.x + this.t*this.t );
+        return Math.sqrt( this.t*this.t + this.x*this.x );
     }
+
+    public double distance( DataPoint point ) {
+
+        return sub( point, this ).module();
+    }
+
+    public double slope( DataPoint point ) {
+
+        DataPoint result = new DataPoint( point );
+
+        result.sub( this );
+
+        return result.x / result.t;
+    }
+
+    public boolean equals( Object otherObject ) {
+
+        if (this == otherObject) {
+
+            return true;
+        }
+
+        if (null == otherObject) {
+
+            return false;
+        }
+
+        if ( !(otherObject instanceof DataPoint) ) {
+
+            return false;
+        }
+
+        DataPoint other = (DataPoint) otherObject;
+
+        return (this.t == other.t) && (this.x == other.x);
+    }
+
+    public int hashCode() {
+
+        return new Double( this.t ).hashCode()
+            + 3*new Double( this.x ).hashCode();
+    }
+
+    public String toString() {
+
+        return this.t + "\t" + this.x;
+    }
+
+    public static final DataPoint ZERO = new DataPoint();
+
+    private double t;
+    private double x;
 }
