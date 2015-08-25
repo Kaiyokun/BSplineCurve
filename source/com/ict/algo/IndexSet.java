@@ -1,3 +1,5 @@
+package com.ict.algo;
+
 public class IndexSet<T> {
 
     public IndexSet( T[] array, int begin, int end ) {

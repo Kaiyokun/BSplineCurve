@@ -1,3 +1,5 @@
+package com.ict.algo;
+
 /**
  * 用于描述插值节点u = (u[0], u[1], ..., u[m])的类
  */

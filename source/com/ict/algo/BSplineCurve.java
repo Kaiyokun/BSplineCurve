@@ -1,3 +1,5 @@
+package com.ict.algo;
+
 import java.util.ArrayList;
 
 public class BSplineCurve {

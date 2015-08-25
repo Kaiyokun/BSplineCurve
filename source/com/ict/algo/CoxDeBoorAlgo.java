@@ -1,3 +1,5 @@
+package com.ict.algo;
+
 /**
  * 用于描述Cox-deBoor算法的类
  */

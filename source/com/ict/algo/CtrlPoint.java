@@ -1,3 +1,5 @@
+package com.ict.algo;
+
 public class CtrlPoint {
 
     public CtrlPoint(  CoxDeBoorAlgo deBoorAlgo

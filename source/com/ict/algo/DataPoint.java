@@ -1,3 +1,5 @@
+package com.ict.algo;
+
 /**
  * 用于描述二维点P(t,x)的类
  */
