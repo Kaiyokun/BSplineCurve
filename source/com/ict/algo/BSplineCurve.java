@@ -6,9 +6,13 @@ public class BSplineCurve {
 
     public static void main( String[] args ) {
 
-        BSplineCurve thisInstance = new BSplineCurve( DataPointIO.load( args[0] ) );
+        ArrayList<DataPoint> modelPoint = DataPointIO.load( args[0] );
 
-        DataPointIO.save( thisInstance.Interpolate( Integer.parseInt( args[1] ) ), args[2] );
+        BSplineCurve thisInstance = new BSplineCurve( modelPoint );
+
+        int split = (args.length == 1) ? 10 : Integer.parseInt( args[1] );
+
+        DataPointIO.save(  thisInstance.interpolate( modelPoint.size() * split ), args[0] + ".out" );
     }
 
     public BSplineCurve( ArrayList<DataPoint> modelPoint, int pth ) {
@@ -27,7 +31,7 @@ public class BSplineCurve {
         this( modelPoint, 3 );
     }
 
-    public ArrayList<DataPoint> Interpolate( int split ) {
+    public ArrayList<DataPoint> interpolate( int split ) {
 
         ArrayList<DataPoint> curve = new ArrayList<DataPoint>();
 
