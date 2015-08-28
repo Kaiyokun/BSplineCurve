@@ -9,7 +9,16 @@ public class BSplineCurve {
         ArrayList<DataPoint> modelPoint = DataPointIO.load( args[0] );
 
         BSplineCurve thisInstance = new BSplineCurve( modelPoint );
+        /*
+        DataPoint[] V = new DataPoint[ modelPoint.size() ];
+        modelPoint.toArray( V );
 
+        InterpNode    interpNode = new InterpNode( V, new AccumulatedChordAlgo() );
+        CoxDeBoorAlgo deBoorAlgo = new CoxDeBoorAlgo( interpNode );
+        CtrlPoint     ctrlPoint  = new CtrlPoint( deBoorAlgo, interpNode, V );
+
+        BSplineCurve thisInstance = new BSplineCurve( ctrlPoint, interpNode );
+        */
         int split = (args.length == 1) ? 10 : Integer.parseInt( args[1] );
 
         DataPointIO.save(  thisInstance.interpolate( modelPoint.size() * split ), args[0] + ".out" );
@@ -29,6 +38,14 @@ public class BSplineCurve {
     public BSplineCurve( ArrayList<DataPoint> modelPoint ) {
 
         this( modelPoint, 3 );
+    }
+
+    public BSplineCurve( CtrlPoint ctrlPoint, InterpNode interpNode ) {
+
+        this.deBoorAlgo = new CoxDeBoorAlgo(  interpNode
+                                              // m + 1 = n + 1 + p + 1
+                                            , interpNode.length() - ctrlPoint.length() - 1 );
+        this.ctrlPoint  = ctrlPoint;
     }
 
     public ArrayList<DataPoint> interpolate( int split ) {

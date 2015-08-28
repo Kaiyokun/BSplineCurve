@@ -5,10 +5,20 @@ package com.ict.algo;
  */
 public class InterpNode {
 
-    public InterpNode( DataPoint[] modelPoint, int pth ) {
+    public InterpNode( DataPoint[] modelPoint, int pth, InterpNodeAlgo algo ) {
 
         this.pth = pth;
-        this.calcInterpNode( modelPoint );
+        this.calcInterpNode( modelPoint, algo );
+    }
+
+    public InterpNode( DataPoint[] modelPoint, int pth ) {
+
+        this( modelPoint, pth, new DefaultAlgo() );
+    }
+
+    public InterpNode( DataPoint[] modelPoint, InterpNodeAlgo algo ) {
+
+        this( modelPoint, 3, algo );
     }
 
     public InterpNode( DataPoint[] modelPoint ) {
@@ -65,7 +75,7 @@ public class InterpNode {
         return u - this.at(i);
     }
 
-    private void calcInterpNode( DataPoint[] modelPoint ) {
+    private void calcInterpNode( DataPoint[] modelPoint, InterpNodeAlgo algo ) {
 
         int p = this.pth;
         int m = (modelPoint.length - 1) + 2*p;
@@ -81,16 +91,26 @@ public class InterpNode {
             this.interpNode[m-p+i] = 1.0;
         }
 
-        this.defaultMethod( modelPoint );
+        algo.calc( modelPoint, this.interpNode, this.pth );
     }
 
-    /**
-     * 累积弦长法
-     */
-    private void cumulateChordLength( DataPoint[] modelPoint ) {
+    private int      pth;
+    private double[] interpNode;
+}
+
+interface InterpNodeAlgo {
+
+    public void calc( DataPoint[] modelPoint, double[] interpNode, int p );
+}
+
+/**
+ * 累积弦长法
+ */
+class AccumulatedChordAlgo implements InterpNodeAlgo {
+
+    public void calc( DataPoint[] modelPoint, double[] interpNode, int p ) {
 
         int n = modelPoint.length - 1;
-        int p = this.pth;
 
         double[] chordLength    = new double[ n + 1 ];
                  chordLength[0] = 0.0;
@@ -103,17 +123,19 @@ public class InterpNode {
 
         for (int i=1; i<n; ++i) {
 
-            this.interpNode[p+i] = chordLength[i] / chordLength[n];
+            interpNode[p+i] = chordLength[i] / chordLength[n];
         }
     }
+}
 
-    /**
-     * 向心参数法
-     */
-    private void cumulateSqrtChordLength( DataPoint[] modelPoint ) {
+/**
+ * 向心参数法
+ */
+class AccumulatedSqrtChordAlgo implements InterpNodeAlgo {
+
+    public void calc( DataPoint[] modelPoint, double[] interpNode, int p ) {
 
         int n = modelPoint.length - 1;
-        int p = this.pth;
 
         double[] chordLength    = new double[ n + 1 ];
                  chordLength[0] = 0.0;
@@ -126,16 +148,18 @@ public class InterpNode {
 
         for (int i=1; i<n; ++i) {
 
-            this.interpNode[p+i] = chordLength[i] / chordLength[n];
+            interpNode[p+i] = chordLength[i] / chordLength[n];
         }
     }
+}
 
-    /**
-     * 均匀参数法
-     */
-    private void defaultMethod( DataPoint[] modelPoint ) {
+/**
+ * 均匀参数法
+ */
+class DefaultAlgo implements InterpNodeAlgo {
 
-        int p = this.pth;
+    public void calc( DataPoint[] modelPoint, double[] interpNode, int p ) {
+
         int m = (modelPoint.length - 1) + 2*p;
 
         double h = 1.0 / modelPoint.length;
@@ -143,10 +167,7 @@ public class InterpNode {
         for (int i=p+1; i<m-p; ++i) {
 
             // u[p+1], u[p+2], ..., u[m-p-1]
-            this.interpNode[i] = this.interpNode[i-1] + h;
+            interpNode[i] = interpNode[i-1] + h;
         }
     }
-
-    private int      pth;
-    private double[] interpNode;
 }

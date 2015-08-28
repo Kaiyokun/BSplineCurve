@@ -89,14 +89,11 @@ public class DataPoint {
         return this.x;
     }
 
-    public double module() {
-
-        return Math.sqrt( this.t*this.t + this.x*this.x );
-    }
-
     public double distance( DataPoint point ) {
 
-        return sub( point, this ).module();
+        DataPoint result = sub( point, this );
+
+        return Math.sqrt( result.t*result.t + result.x*result.x );
     }
 
     public double slope( DataPoint point ) {

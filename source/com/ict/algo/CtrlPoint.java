@@ -93,9 +93,19 @@ public class CtrlPoint {
         this( deBoorAlgo, interpNode, modelPoint, 3 );
     }
 
+    public CtrlPoint( DataPoint[] ctrlPoint ) {
+
+        this.ctrlPoint = ctrlPoint;
+    }
+
     public DataPoint at( int index ) {
 
         return this.ctrlPoint[index];
+    }
+
+    public int length() {
+
+        return this.ctrlPoint.length;
     }
 
     private DataPoint[] ctrlPoint; // ¿ØÖÆµã
